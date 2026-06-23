@@ -1,11 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 
-from telegram import (
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup
-)
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -16,284 +12,120 @@ from telegram.ext import (
 )
 
 from config import TOKEN, ADMIN_ID
-from config.packages import PACKAGE_MAP
+from packages import PACKAGE_MAP
 
-from storage import (
-    set_ref,
-    get_ref,
-    set_pending_payment,
-    get_pending_payment,
-    clear_pending_payment,
-    mark_trial_used,
-    has_used_trial
-)
-
+from storage import *
 from sheet import save_member, save_trial
 from scheduler import activate_user
 
 
-# =========================
-# START + REFERRAL + LANDING
-# =========================
+# ================= START =================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.message.from_user
-
     ref = context.args[0] if context.args else ""
-    set_ref(user.id, ref)
+    set_ref(update.message.from_user.id, ref)
 
-    caption = """
-🎯 SELAMAT DATANG DI SIGNAL AI SYSTEM
+    keyboard = [[InlineKeyboardButton("Saya Bersedia", callback_data="agree")]]
 
-Halo 👋
-
-📊 CONTOH SIGNAL AI TOOLS SYSTEM
-
-📊 XAUUSD SIGNAL
-
-🕒 2026-06-22 23:00:00 WIB
-
-📈 BIAS: BUY
-
-📌 ENTRY: BUY LIMIT @ 4182.53
-
-🎯 TP1: 4189.53
-🎯 TP2: 4197.53
-⛔️ SL : 4177.53
-
-💡 Klik tombol di bawah jika sudah memahami.
-"""
-
-    keyboard = [
-        [InlineKeyboardButton("Saya Bersedia Bergabung", callback_data="agree")]
-    ]
-
-    await update.message.reply_photo(
-        photo=open("assets/signal_ai.png", "rb"),
-        caption=caption,
+    await update.message.reply_text(
+        "🎯 SELAMAT DATANG DI SIGNAL AI SYSTEM",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 
-# =========================
-# AGREE BUTTON
-# =========================
+# ================= AGREE =================
 async def agree(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+    q = update.callback_query
+    await q.answer()
 
     keyboard = [
-        [InlineKeyboardButton("📦 Pilih Paket", callback_data="packages")],
-        [InlineKeyboardButton("🆓 Trial 60 Menit", callback_data="trial")]
+        [InlineKeyboardButton("Paket", callback_data="packages")],
+        [InlineKeyboardButton("Trial 60 Menit", callback_data="trial")]
     ]
 
-    await query.edit_message_text(
-        "Silahkan pilih:",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await q.edit_message_text("Pilih:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# =========================
-# SHOW PACKAGES
-# =========================
+# ================= PACKAGES =================
 async def show_packages(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+    q = update.callback_query
+    await q.answer()
 
     buttons = []
-
-    for key, p in PACKAGE_MAP.items():
+    for k, v in PACKAGE_MAP.items():
         buttons.append([
-            InlineKeyboardButton(
-                f"{p['label']} - Rp {p['price']}",
-                callback_data=f"buy_{key}"
-            )
+            InlineKeyboardButton(f"{v['label']} - {v['price']}", callback_data=f"buy_{k}")
         ])
 
-    await query.edit_message_text(
-        "📦 Pilih Paket:",
-        reply_markup=InlineKeyboardMarkup(buttons)
+    await q.edit_message_text("Pilih paket:", reply_markup=InlineKeyboardMarkup(buttons))
+
+
+# ================= BUY =================
+async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    q = update.callback_query
+    await q.answer()
+
+    key = q.data.replace("buy_", "")
+    package = PACKAGE_MAP[key]
+
+    set_pending_payment(q.from_user.id, {
+        "package": key,
+        "username": q.from_user.username,
+        "ref": get_ref(q.from_user.id)
+    })
+
+    await q.edit_message_text(
+        f"💰 {package['label']}\n💳 Transfer lalu kirim bukti."
     )
 
 
-# =========================
-# BUY PACKAGE
-# =========================
-async def buy_package(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    key = query.data.replace("buy_", "")
-    package = PACKAGE_MAP[key]
-
-    user = query.from_user
-
-    set_pending_payment(user.id, {
-        "package": key,
-        "username": user.username,
-        "ref": get_ref(user.id)
-    })
-
-    text = f"""
-💰 Paket: {package['label']}
-💵 Harga: Rp {package['price']}
-
-🏦 BANK SMBC
-👤 a/n Yuriandi Arma
-💳 90240573080
-
-🏦 CIMB NIAGA
-💳 708420455200
-
-📸 Kirim bukti transfer setelah pembayaran.
-"""
-
-    await query.edit_message_text(text)
-
-
-# =========================
-# TRIAL SYSTEM
-# =========================
+# ================= TRIAL =================
 async def trial(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+    q = update.callback_query
+    await q.answer()
 
-    user = query.from_user
+    user = q.from_user
 
     if has_used_trial(user.id):
-        await query.edit_message_text("❌ Kamu sudah pernah menggunakan trial.")
+        await q.edit_message_text("Sudah pakai trial.")
         return
 
-    expire_at = datetime.now() + timedelta(minutes=60)
+    expire = datetime.now() + timedelta(minutes=60)
 
     save_trial({
         "user_id": user.id,
         "username": user.username,
         "claim_at": str(datetime.now()),
-        "expire_at": str(expire_at),
+        "expire_at": str(expire),
         "status": "ACTIVE",
         "ref": get_ref(user.id)
     })
 
     mark_trial_used(user.id)
 
-    await query.edit_message_text("⏳ Trial aktif 60 menit.")
+    await q.edit_message_text("Trial aktif 60 menit")
 
 
-# =========================
-# HANDLE BUKTI TRANSFER
-# =========================
-async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# ================= PHOTO =================
+async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
-    photo = update.message.photo[-1].file_id
-
     pending = get_pending_payment(user.id)
 
     if not pending:
-        await update.message.reply_text("❌ Kamu belum memilih paket.")
-        return
+        return await update.message.reply_text("Tidak ada transaksi")
 
-    context.user_data[user.id] = {
-        "photo": photo,
-        "pending": pending
-    }
-
-    keyboard = [
-        [
-            InlineKeyboardButton("✅ Approve", callback_data=f"approve_{user.id}"),
-            InlineKeyboardButton("❌ Reject", callback_data=f"reject_{user.id}")
-        ]
-    ]
-
-    await context.bot.send_photo(
+    await context.bot.send_message(
         chat_id=ADMIN_ID,
-        photo=photo,
-        caption=f"""
-📥 BUKTI PEMBAYARAN
-
-User ID: {user.id}
-Username: @{user.username}
+        text=f"""
+BUKTI BAYAR
+User: {user.id}
 Package: {pending['package']}
-Ref: {pending.get('ref')}
-""",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+"""
     )
 
-    await update.message.reply_text("📩 Bukti diterima, menunggu admin.")
+    await update.message.reply_text("Menunggu approval admin")
 
 
-# =========================
-# ADMIN APPROVE / REJECT
-# =========================
-async def admin_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    action, user_id = query.data.split("_")
-    user_id = int(user_id)
-
-    data = context.user_data.get(user_id)
-
-    if not data:
-        await query.edit_message_text("Data tidak ditemukan.")
-        return
-
-    pending = data["pending"]
-    package_key = pending["package"]
-
-    # EXPIRY
-    if package_key == "trial":
-        expire_at = datetime.now() + timedelta(minutes=60)
-    else:
-        map_days = {
-            "1bulan": 30,
-            "6bulan": 180,
-            "12bulan": 365,
-            "permanent": None
-        }
-        days = map_days.get(package_key)
-        expire_at = None if days is None else datetime.now() + timedelta(days=days)
-
-    # APPROVE
-    if action == "approve":
-
-        save_member({
-            "user_id": user_id,
-            "username": pending["username"],
-            "package": package_key,
-            "price": PACKAGE_MAP[package_key]["price"],
-            "status": "ACTIVE",
-            "expire_at": str(expire_at),
-            "kicked_at": "",
-            "invited": "YES",
-            "ref": pending.get("ref")
-        })
-
-        activate_user(user_id, expire_at)
-        clear_pending_payment(user_id)
-
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="🎉 WELCOME SIGNAL AI\nAkses kamu sudah aktif!"
-        )
-
-        await query.edit_message_text("✅ APPROVED")
-
-    # REJECT
-    elif action == "reject":
-
-        clear_pending_payment(user_id)
-
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="❌ Pembayaran ditolak. Hubungi admin @ADMOnePercentsFX"
-        )
-
-        await query.edit_message_text("❌ REJECTED")
-
-
-# =========================
-# MAIN
-# =========================
+# ================= MAIN =================
 def main():
     app = Application.builder().token(TOKEN).build()
 
@@ -301,14 +133,12 @@ def main():
 
     app.add_handler(CallbackQueryHandler(agree, pattern="agree"))
     app.add_handler(CallbackQueryHandler(show_packages, pattern="packages"))
-    app.add_handler(CallbackQueryHandler(buy_package, pattern="buy_"))
+    app.add_handler(CallbackQueryHandler(buy, pattern="buy_"))
     app.add_handler(CallbackQueryHandler(trial, pattern="trial"))
 
-    app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-    app.add_handler(CallbackQueryHandler(admin_action, pattern="approve_"))
-    app.add_handler(CallbackQueryHandler(admin_action, pattern="reject_"))
+    app.add_handler(MessageHandler(filters.PHOTO, photo))
 
-    print("Bot running...")
+    print("BOT RUNNING")
     app.run_polling()
 
 
