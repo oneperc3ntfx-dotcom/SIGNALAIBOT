@@ -18,7 +18,7 @@ dp = Dispatcher()
 
 user_packages = {}
 
-WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxpObmV0ujVFhePbUzTWQT8U8rF8uSS8JRsDP0MmDyjFX42Q5iwn2Rw51Tf00ZJJMeOGA/exec"
+WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxpCkQotuD5i0RMyJ0J4Px9o2QO9Hoz2iscxJGQDIwNTM-8J6QSM5a6bMhuEn2N-YM9nQ/exec"
 
 
 # ================= SIGNAL TEMPLATE =================
