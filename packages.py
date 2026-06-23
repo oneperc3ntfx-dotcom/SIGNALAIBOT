@@ -19,11 +19,9 @@ PACKAGE_MAP = {
         "price": 1999999,
         "days": None
     },
-
-    # 🆕 Trial 60 menit
     "trial": {
-        "label": "Trial (60 Menit)",
+        "label": "Trial 60 Menit",
         "price": 0,
-        "duration_minutes": 60
+        "days": None
     }
 }
