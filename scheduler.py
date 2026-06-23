@@ -1,33 +1,34 @@
+import requests
 from datetime import datetime
 
-ACTIVE_USERS = {}
+WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-Fy1k3GjX7fYTTAfgcDNs2FWlWeCZxW60zCsYXsjJlZHnAkgGuoVfS0fN1Ms14x1eqA/exec"
 
 
-def activate_user(user_id, expire_at):
-    ACTIVE_USERS[user_id] = expire_at
-
-
-async def scheduler_loop(bot):
+async def expiry_worker(bot, group_id):
     while True:
-        now = datetime.now()
+        try:
+            r = requests.get(WEB_APP_URL, params={"action": "get_all_users"})
+            users = r.json().get("users", [])
 
-        for user_id, exp in list(ACTIVE_USERS.items()):
-            if exp and now >= exp:
-                try:
-                    await bot.ban_chat_member(chat_id=-1001234567890, user_id=user_id)
-                    await bot.unban_chat_member(chat_id=-1001234567890, user_id=user_id)
-                except:
-                    pass
+            now = datetime.utcnow()
 
-                try:
-                    await bot.send_message(
-                        chat_id=user_id,
-                        text="⛔ Akses kamu sudah habis. Silakan upgrade."
-                    )
-                except:
-                    pass
+            for u in users:
+                user_id = int(u[0])
+                expire = u[5]
 
-                del ACTIVE_USERS[user_id]
+                if not expire:
+                    continue
 
-        import asyncio
+                exp = datetime.strptime(expire, "%Y-%m-%d %H:%M:%S")
+
+                if now > exp:
+                    try:
+                        await bot.ban_chat_member(group_id, user_id)
+                        await bot.unban_chat_member(group_id, user_id)
+                    except:
+                        pass
+
+        except Exception as e:
+            print("worker error:", e)
+
         await asyncio.sleep(60)
