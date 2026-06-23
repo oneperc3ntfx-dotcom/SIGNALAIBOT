@@ -1,0 +1,14 @@
+BOT_TOKEN = "8813573079:AAEDlmf7rNgNDqjyKGAFpHT0AscCiSbdnRs"
+ADMIN_ID = 1305881282
+GROUP_ID = -1002510797113
+
+BANK_INFO = """
+🏦 Bank SMBC  
+👤 a/n Yuriandi Arma  
+💳 90240573080
+
+🏦 Bank CIMB NIAGA  
+👤 a/n Yuriandi Arma  
+💳 708420455200
+
+"""
