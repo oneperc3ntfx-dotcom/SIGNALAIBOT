@@ -1,3 +1,4 @@
+import asyncio
 import requests
 from datetime import datetime
 
@@ -5,6 +6,7 @@ WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-Fy1k3GjX7fYTTAfgcDNs2F
 
 
 async def expiry_worker(bot, group_id):
+
     while True:
         try:
             r = requests.get(WEB_APP_URL, params={"action": "get_all_users"})
