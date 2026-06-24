@@ -22,37 +22,41 @@ user_proofs = {}
 
 def signal_example():
     return """
+<blockquote>
 📊 XAUUSD SIGNAL
 
-🕒 2026-06-22 23:00:00 WIB
+🕒 22 Juni 2026 • 23:00 WIB
 
-📈 BIAS: BUY
+📈 BIAS : BUY
 
-📌 ENTRY: BUY LIMIT @ 4182.53
+📌 ENTRY : BUY LIMIT @ 4182.53
 
-🎯 TP1: 4189.53
-🎯 TP2: 4197.53
-⛔️ SL : 4177.53
+🎯 TAKE PROFIT
+• TP1 : 4189.53
+• TP2 : 4197.53
 
-🧠 REASON:
-- Liquidity sweep bullish
-- Bullish reversal
-- Momentum shift up
+⛔ STOP LOSS
+• SL : 4177.53
+
+🧠 ANALISA
+• Bullish Liquidity Sweep
+• Bullish Reversal Confirmation
+• Momentum Shift Up
 
 ━━━━━━━━━━━━
+⚠️ Gunakan manajemen risiko yang baik pada setiap transaksi.
+</blockquote>
 """
 
 
 @dp.message(Command("start"))
 async def start(message: Message):
 
-    photo = FSInputFile("assets/signal_ai.jpg")
-
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="🚀 SAYA BERSEDIA BERGABUNG",
+                    text="🚀 SAYA SIAP BERGABUNG",
                     callback_data="join"
                 )
             ]
@@ -60,19 +64,53 @@ async def start(message: Message):
     )
 
     text = (
-        "🎯 SELAMAT DATANG DI SIGNAL AI SYSTEM\n\n"
+        "<b>🎯 SELAMAT DATANG DI SIGNAL AI SYSTEM</b>\n\n"
+
         "Halo 👋\n\n"
-        "Mohon Di baca Gambar Diatas Sebelum Bergabung\n\n"
-        "📊 CONTOH SIGNAL AI TOOLS SYSTEM\n\n"
+
+        "Terima kasih telah mengunjungi layanan "
+        "<b>Signal AI Premium</b>.\n\n"
+
+        "Mohon luangkan waktu sejenak untuk membaca "
+        "informasi pada gambar di atas agar Anda memahami "
+        "cara kerja layanan kami dan dapat menggunakan signal "
+        "dengan lebih optimal.\n\n"
+
+        "<b>📊 CONTOH SIGNAL PREMIUM</b>\n\n"
+
         f"{signal_example()}\n"
-        "💡 Silahkan Klik Tombol Di bawah , jika sudah Memahami."
+
+        "<b>✨ Keuntungan Member Premium</b>\n\n"
+
+        "✅ Signal harian berkualitas\n"
+        "✅ Analisa market berbasis AI\n"
+        "✅ Update market secara berkala\n"
+        "✅ Akses grup member eksklusif\n"
+        "✅ Support dan edukasi trading\n\n"
+
+        "💡 Jika Anda sudah memahami layanan ini dan siap "
+        "bergabung bersama member premium kami, "
+        "silakan klik tombol di bawah."
     )
 
-    await message.answer_photo(
-        photo=photo,
-        caption=text,
-        reply_markup=kb
-    )
+    try:
+        photo = FSInputFile("assets/signal_ai.jpg")
+
+        await message.answer_photo(
+            photo=photo,
+            caption=text,
+            reply_markup=kb,
+            parse_mode="HTML"
+        )
+
+    except Exception as e:
+        print("Photo error:", e)
+
+        await message.answer(
+            text,
+            reply_markup=kb,
+            parse_mode="HTML"
+        )
 
 
 @dp.callback_query(F.data == "join")
@@ -82,25 +120,25 @@ async def join(callback: CallbackQuery):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="1 BULAN - 199K",
+                    text="💎 1 BULAN • Rp199K",
                     callback_data="pkg_1bulan"
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="6 BULAN - 549K",
+                    text="💎 6 BULAN • Rp549K",
                     callback_data="pkg_6bulan"
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="12 BULAN - 999K",
+                    text="💎 12 BULAN • Rp999K",
                     callback_data="pkg_12bulan"
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="PERMANENT - 1.999K",
+                    text="👑 PERMANENT • Rp1.999K",
                     callback_data="pkg_permanent"
                 )
             ]
@@ -108,8 +146,10 @@ async def join(callback: CallbackQuery):
     )
 
     await callback.message.answer(
-        "💰 Pilih Paket Langganan",
-        reply_markup=kb
+        "<b>💰 PILIH PAKET LANGGANAN SIGNAL AI PREMIUM</b>\n\n"
+        "Silakan pilih paket yang sesuai dengan kebutuhan Anda.",
+        reply_markup=kb,
+        parse_mode="HTML"
     )
 
     await callback.answer()
@@ -125,13 +165,23 @@ async def select_package(callback: CallbackQuery):
     data = PACKAGE_MAP[package]
 
     text = (
-        f"💰 Paket: {data['label']}\n"
-        f"💵 Harga: Rp {data['price']:,}\n\n"
+        f"💎 <b>Paket:</b> {data['label']}\n"
+        f"💰 <b>Biaya:</b> Rp {data['price']:,}\n\n"
+
         f"{BANK_INFO}\n\n"
-        "Kirim bukti transfer ke sini ya."
+
+        "━━━━━━━━━━━━\n\n"
+
+        "📸 Setelah melakukan pembayaran, "
+        "silakan kirim bukti transfer ke chat ini.\n\n"
+
+        "⏳ Tim kami akan segera melakukan verifikasi pembayaran Anda."
     )
 
-    await callback.message.answer(text)
+    await callback.message.answer(
+        text,
+        parse_mode="HTML"
+    )
 
     await callback.answer()
 
@@ -147,7 +197,7 @@ async def receive_proof(message: Message):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="✅ SUDAH TRANSFER",
+                    text="✅ SAYA SUDAH TRANSFER",
                     callback_data="confirm_transfer"
                 )
             ]
@@ -155,8 +205,12 @@ async def receive_proof(message: Message):
     )
 
     await message.answer(
-        "✅ Bukti diterima.\n\nSilakan klik tombol di bawah jika Anda sudah transfer.",
-        reply_markup=kb
+        "✅ <b>Bukti transfer berhasil diterima.</b>\n\n"
+        "Silakan klik tombol di bawah untuk mengirim "
+        "permintaan verifikasi kepada admin.\n\n"
+        "⏳ Proses verifikasi biasanya hanya memerlukan beberapa menit.",
+        reply_markup=kb,
+        parse_mode="HTML"
     )
 
 
@@ -168,19 +222,41 @@ async def confirm_transfer(callback: CallbackQuery):
     package_key = user_packages.get(user.id)
 
     if not package_key:
-        await callback.answer("Pilih paket terlebih dahulu")
+        await callback.answer(
+            "Silakan pilih paket terlebih dahulu.",
+            show_alert=True
+        )
         return
 
     package = PACKAGE_MAP[package_key]
 
     proof = user_proofs.get(user.id)
 
+    if not proof:
+        await callback.answer(
+            "Bukti transfer belum ditemukan.",
+            show_alert=True
+        )
+        return
+
+    username = (
+        f"@{user.username}"
+        if user.username
+        else "Tidak ada username"
+    )
+
     admin_text = (
-        "🔔 REQUEST PEMBAYARAN BARU\n\n"
-        f"👤 Username: @{user.username}\n"
-        f"🆔 User ID: {user.id}\n\n"
-        f"📦 Paket: {package['label']}\n"
-        f"💵 Harga: Rp {package['price']:,}"
+        "🔔 <b>PERMINTAAN VERIFIKASI PEMBAYARAN</b>\n\n"
+
+        f"👤 <b>Username:</b> {username}\n"
+        f"🆔 <b>User ID:</b> <code>{user.id}</code>\n\n"
+
+        f"📦 <b>Paket:</b> {package['label']}\n"
+        f"💰 <b>Nominal:</b> Rp {package['price']:,}\n\n"
+
+        "📸 Bukti transfer terlampir di atas.\n\n"
+
+        "Silakan lakukan verifikasi pembayaran dan pilih tindakan di bawah."
     )
 
     kb = InlineKeyboardMarkup(
@@ -202,11 +278,14 @@ async def confirm_transfer(callback: CallbackQuery):
         ADMIN_ID,
         photo=proof,
         caption=admin_text,
-        reply_markup=kb
+        reply_markup=kb,
+        parse_mode="HTML"
     )
 
     await callback.message.answer(
-        "✅ Permintaan berhasil dikirim ke admin.\nMohon tunggu verifikasi."
+        "✅ Permintaan verifikasi berhasil dikirim ke admin.\n\n"
+        "Mohon tunggu proses pengecekan pembayaran.",
+        parse_mode="HTML"
     )
 
     await callback.answer()
@@ -217,17 +296,41 @@ async def approve(callback: CallbackQuery):
 
     user_id = int(callback.data.split("_")[1])
 
-    invite = await bot.create_chat_invite_link(
-        chat_id=GROUP_ID,
-        member_limit=1
-    )
+    try:
 
-    await bot.send_message(
-        user_id,
-        f"🎉 Pembayaran diterima.\n\nSilakan bergabung:\n{invite.invite_link}"
-    )
+        invite = await bot.create_chat_invite_link(
+            chat_id=GROUP_ID,
+            member_limit=1
+        )
 
-    await callback.message.answer("✅ User berhasil diapprove")
+        await bot.send_message(
+            user_id,
+            f"""
+🎉 <b>Pembayaran Berhasil Diverifikasi</b>
+
+Selamat! Akun Anda telah berhasil diaktifkan sebagai member premium.
+
+🔗 Silakan bergabung ke grup eksklusif melalui tautan berikut:
+
+{invite.invite_link}
+
+📈 Selamat trading dan semoga profit konsisten!
+
+Terima kasih telah bergabung bersama Signal AI Premium 🚀
+""",
+            parse_mode="HTML"
+        )
+
+        await callback.message.answer(
+            "✅ User berhasil diapprove."
+        )
+
+    except Exception as e:
+
+        await callback.message.answer(
+            f"❌ Error approve:\n{e}"
+        )
+
     await callback.answer()
 
 
@@ -236,16 +339,37 @@ async def reject(callback: CallbackQuery):
 
     user_id = int(callback.data.split("_")[1])
 
-    await bot.send_message(
-        user_id,
-        "❌ Pembayaran ditolak.\nSilakan hubungi admin."
-    )
+    try:
 
-    await callback.message.answer("❌ User ditolak")
+        await bot.send_message(
+            user_id,
+            """
+❌ <b>Pembayaran Belum Dapat Diverifikasi</b>
+
+Mohon maaf, pembayaran Anda belum dapat kami konfirmasi.
+
+Silakan periksa kembali bukti transfer yang dikirim atau hubungi admin untuk bantuan lebih lanjut.
+
+🙏 Terima kasih atas pengertiannya.
+""",
+            parse_mode="HTML"
+        )
+
+        await callback.message.answer(
+            "❌ User berhasil ditolak."
+        )
+
+    except Exception as e:
+
+        await callback.message.answer(
+            f"❌ Error reject:\n{e}"
+        )
+
     await callback.answer()
 
 
 async def main():
+    print("Bot running...")
     await dp.start_polling(bot)
 
 
