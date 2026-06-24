@@ -326,7 +326,8 @@ async def reject(callback: CallbackQuery):
 
 Mohon maaf, pembayaran Anda belum dapat kami konfirmasi.
 
-Silakan periksa kembali bukti transfer yang dikirim atau hubungi admin untuk bantuan lebih lanjut.
+Silakan periksa kembali bukti transfer yang dikirim atau hubungi admin untuk bantuan lebih lanjut
+@ADMOnePercentsFX.
 
 🙏 Terima kasih atas pengertiannya.
 """,
