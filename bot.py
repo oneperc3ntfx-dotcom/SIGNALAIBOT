@@ -19,6 +19,9 @@ dp = Dispatcher()
 user_packages = {}
 user_proofs = {}
 
+# ================= TAMBAHAN: REFERRAL =================
+user_referral = {}
+
 
 def signal_example():
     return """
@@ -53,6 +56,14 @@ def signal_example():
 @dp.message(Command("start"))
 async def start(message: Message):
 
+    # ================= REF PARSE =================
+    ref = None
+    if message.text and len(message.text.split()) > 1:
+        ref = message.text.split()[1]
+
+    if ref:
+        user_referral[message.from_user.id] = ref
+
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -71,11 +82,6 @@ async def start(message: Message):
 
         "Terima kasih telah mengunjungi layanan "
         "<b>Signal AI Premium</b>.\n\n"
-
-        "Mohon luangkan waktu sejenak untuk membaca "
-        "informasi pada gambar di atas agar Anda memahami "
-        "cara kerja layanan kami dan dapat menggunakan signal "
-        "dengan lebih optimal.\n\n"
 
         "<b>📊 CONTOH SIGNAL PREMIUM</b>\n\n"
 
@@ -114,7 +120,7 @@ async def start(message: Message):
         )
 
 
-# ================= JOIN (TOMBOL HILANG) =================
+# ================= JOIN =================
 @dp.callback_query(F.data == "join")
 async def join(callback: CallbackQuery):
 
@@ -159,7 +165,7 @@ async def join(callback: CallbackQuery):
     await callback.answer()
 
 
-# ================= PACKAGE (TOMBOL HILANG) =================
+# ================= PACKAGE =================
 @dp.callback_query(F.data.startswith("pkg_"))
 async def select_package(callback: CallbackQuery):
 
@@ -178,11 +184,7 @@ async def select_package(callback: CallbackQuery):
         f"{BANK_INFO}\n\n"
 
         "━━━━━━━━━━━━\n\n"
-
-        "📸 Setelah melakukan pembayaran, "
-        "silakan kirim bukti transfer ke chat ini.\n\n"
-
-        "⏳ Tim kami akan segera melakukan verifikasi pembayaran Anda."
+        "📸 Kirim bukti transfer setelah pembayaran.\n"
     )
 
     await callback.message.answer(text, parse_mode="HTML")
@@ -207,16 +209,13 @@ async def receive_proof(message: Message):
     )
 
     await message.answer(
-        "✅ <b>Bukti transfer berhasil diterima.</b>\n\n"
-        "Silakan klik tombol di bawah untuk mengirim "
-        "permintaan verifikasi kepada admin.\n\n"
-        "⏳ Proses verifikasi biasanya hanya memerlukan beberapa menit.",
+        "✅ <b>Bukti diterima.</b>\nTekan tombol di bawah untuk verifikasi.",
         reply_markup=kb,
         parse_mode="HTML"
     )
 
 
-# ================= CONFIRM (TOMBOL HILANG) =================
+# ================= CONFIRM =================
 @dp.callback_query(F.data == "confirm_transfer")
 async def confirm_transfer(callback: CallbackQuery):
 
@@ -227,27 +226,29 @@ async def confirm_transfer(callback: CallbackQuery):
     package_key = user_packages.get(user.id)
 
     if not package_key:
-        await callback.answer("Silakan pilih paket terlebih dahulu.", show_alert=True)
+        await callback.answer("Pilih paket dulu.", show_alert=True)
         return
 
     proof = user_proofs.get(user.id)
 
     if not proof:
-        await callback.answer("Bukti transfer belum ditemukan.", show_alert=True)
+        await callback.answer("Bukti tidak ditemukan.", show_alert=True)
         return
 
     data = PACKAGE_MAP[package_key]
 
     username = f"@{user.username}" if user.username else "Tidak ada username"
 
+    # ================= REF =================
+    ref = user_referral.get(user.id, "Tidak ada")
+
     admin_text = (
-        "🔔 <b>PERMINTAAN VERIFIKASI PEMBAYARAN</b>\n\n"
-        f"👤 <b>Username:</b> {username}\n"
-        f"🆔 <b>User ID:</b> <code>{user.id}</code>\n\n"
-        f"📦 <b>Paket:</b> {data['label']}\n"
-        f"💰 <b>Nominal:</b> Rp {data['price']:,}\n\n"
-        "📸 Bukti transfer terlampir di atas.\n\n"
-        "Silakan lakukan verifikasi pembayaran dan pilih tindakan di bawah."
+        "🔔 <b>VERIFIKASI PEMBAYARAN</b>\n\n"
+        f"👤 Username: {username}\n"
+        f"🆔 User ID: <code>{user.id}</code>\n"
+        f"📦 Paket: {data['label']}\n"
+        f"💰 Nominal: Rp {data['price']:,}\n"
+        f"🔗 Referral: {ref}\n"
     )
 
     kb = InlineKeyboardMarkup(
@@ -267,16 +268,11 @@ async def confirm_transfer(callback: CallbackQuery):
         parse_mode="HTML"
     )
 
-    await callback.message.answer(
-        "✅ Permintaan verifikasi berhasil dikirim ke admin.\n\n"
-        "Mohon tunggu proses pengecekan pembayaran.",
-        parse_mode="HTML"
-    )
-
+    await callback.message.answer("⏳ Menunggu verifikasi admin...")
     await callback.answer()
 
 
-# ================= APPROVE (TOMBOL HILANG) =================
+# ================= APPROVE =================
 @dp.callback_query(F.data.startswith("approve_"))
 async def approve(callback: CallbackQuery):
 
@@ -289,29 +285,36 @@ async def approve(callback: CallbackQuery):
         member_limit=1
     )
 
-    await bot.send_message(
-        user_id,
-        f"""
-🎉 <b>Pembayaran Berhasil Diverifikasi</b>
+    user = await bot.get_chat(user_id)
 
-Selamat! Akun Anda telah berhasil diaktifkan sebagai member premium.
+    username = f"@{user.username}" if user.username else "Tidak ada username"
+    ref = user_referral.get(user_id, "Tidak ada")
+    package = user_packages.get(user_id, "Unknown")
 
-🔗 Silakan bergabung ke grup eksklusif melalui tautan berikut:
-
-{invite.invite_link}
-
-📈 Selamat trading dan semoga profit konsisten!
-
-Terima kasih telah bergabung bersama Signal AI Premium 🚀
-""",
-        parse_mode="HTML"
+    text_success = (
+        "🎉 <b>SUCCESS JOIN TO GROUP</b>\n\n"
+        f"👤 Username: {username}\n"
+        f"🆔 User ID: {user_id}\n"
+        f"📦 Paket: {package}\n"
+        f"⏳ Durasi: {package.replace('_',' ').title()}\n"
+        f"🔗 Referral: {ref}\n\n"
+        f"📎 Link: {invite.invite_link}"
     )
 
-    await callback.message.answer("✅ User berhasil diapprove.")
+    # kirim ke user
+    await bot.send_message(user_id, text_success, parse_mode="HTML")
+
+    # kirim ke admin
+    await bot.send_message(ADMIN_ID, text_success, parse_mode="HTML")
+
+    # kirim ke group
+    await bot.send_message(GROUP_ID, text_success, parse_mode="HTML")
+
+    await callback.message.answer("User approved & broadcast done.")
     await callback.answer()
 
 
-# ================= REJECT (TOMBOL HILANG) =================
+# ================= REJECT =================
 @dp.callback_query(F.data.startswith("reject_"))
 async def reject(callback: CallbackQuery):
 
@@ -321,20 +324,11 @@ async def reject(callback: CallbackQuery):
 
     await bot.send_message(
         user_id,
-        """
-❌ <b>Pembayaran Belum Dapat Diverifikasi</b>
-
-Mohon maaf, pembayaran Anda belum dapat kami konfirmasi.
-
-Silakan periksa kembali bukti transfer yang dikirim atau hubungi admin untuk bantuan lebih lanjut
-@ADMOnePercentsFX.
-
-🙏 Terima kasih atas pengertiannya.
-""",
+        "❌ Pembayaran ditolak. Hubungi admin.",
         parse_mode="HTML"
     )
 
-    await callback.message.answer("❌ User berhasil ditolak.")
+    await callback.message.answer("User ditolak.")
     await callback.answer()
 
 
