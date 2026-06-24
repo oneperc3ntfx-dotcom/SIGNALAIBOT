@@ -324,7 +324,8 @@ async def reject(callback: CallbackQuery):
 
     await bot.send_message(
         user_id,
-        "❌ Pembayaran ditolak. Hubungi admin.",
+        "❌ Pembayaran ditolak. Hubungi admin.
+        @ADMOnePercentsFX ",
         parse_mode="HTML"
     )
 
