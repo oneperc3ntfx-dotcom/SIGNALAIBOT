@@ -86,11 +86,11 @@ async def start(message: Message):
         "<b>📊 CONTOH SIGNAL PREMIUM</b>\n\n"
         f"{signal_example()}\n\n"
         "<b>✨ Keuntungan Member Premium</b>\n\n"
-        "✅ Signal harian berkualitas\n"
+        "✅ Signal harian berbasi AI\n"
         "✅ Analisa market berbasis AI\n"
         "✅ Update market secara berkala\n"
         "✅ Akses grup member eksklusif\n"
-        "✅ Support dan edukasi trading\n\n"
+        "✅ Info NEWS XAUUSD\n\n"
         "💡 Jika Anda sudah memahami layanan ini dan siap "
         "bergabung bersama member premium kami, "
         "silakan klik tombol di bawah."
@@ -178,7 +178,7 @@ async def select_package(callback: CallbackQuery):
         f"💰 <b>Biaya:</b> Rp {data['price']:,}\n\n"
         f"{BANK_INFO}\n\n"
         "━━━━━━━━━━━━\n\n"
-        "📸 Kirim bukti transfer setelah pembayaran.\n"
+        "📸 Kirim bukti transfer setelah pembayaran ke sini.\n"
     )
 
     await callback.message.answer(text, parse_mode="HTML")
@@ -203,7 +203,7 @@ async def receive_proof(message: Message):
     )
 
     await message.answer(
-        "✅ <b>Bukti diterima.</b>\nTekan tombol di bawah untuk verifikasi.",
+        "✅ <b>Bukti diterima.</b>\nTekan tombol (SAYA SUDAH TRANSFER) di bawah untuk verifikasi.",
         reply_markup=kb,
         parse_mode="HTML"
     )
