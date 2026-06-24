@@ -59,7 +59,6 @@ def signal_example():
 @dp.message(Command("start"))
 async def start(message: Message):
 
-    # ================= REF PARSE =================
     ref = None
     if message.text and len(message.text.split()) > 1:
         ref = message.text.split()[1]
@@ -281,8 +280,14 @@ async def approve(callback: CallbackQuery):
     user = await bot.get_chat(user_id)
 
     username = f"@{user.username}" if user.username else "Tidak ada username"
+
     ref = user_referral.get(user_id, "Tidak ada")
     package = user_packages.get(user_id, "Unknown")
+
+    # ================= FIX TAMBAHAN (INI YANG KURANG) =================
+    data = PACKAGE_MAP.get(package, {})
+    label = data.get("label", package)
+    price = data.get("price", 0)
 
     text_success = (
         "🎉 <b>SUCCESS JOIN TO GROUP</b>\n\n"
@@ -290,7 +295,7 @@ async def approve(callback: CallbackQuery):
         f"🆔 User ID: {user_id}\n"
         f"📦 Paket: {label}\n"
         f"💰 Harga: Rp {price:,}\n"
-        f"⏳ Durasi: {package.replace('_',' ').title()}\n"
+        f"⏳ Durasi: {label}\n"
         f"🔗 Referral: {ref}\n\n"
         f"🔗 Invite Link (1x pakai):\n{invite.invite_link}"
     )
