@@ -23,7 +23,7 @@ user_proofs = {}
 user_referral = {}
 
 # ================= TAMBAHAN: BROADCAST GROUP =================
-BROADCAST_GROUP_ID = -1004415837135
+BROADCAST_GROUP_ID = -1004311537613
 
 
 def signal_example():
