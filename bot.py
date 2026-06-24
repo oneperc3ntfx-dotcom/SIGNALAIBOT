@@ -49,6 +49,7 @@ def signal_example():
 """
 
 
+# ================= START =================
 @dp.message(Command("start"))
 async def start(message: Message):
 
@@ -113,8 +114,11 @@ async def start(message: Message):
         )
 
 
+# ================= JOIN (TOMBOL HILANG) =================
 @dp.callback_query(F.data == "join")
 async def join(callback: CallbackQuery):
+
+    await callback.message.edit_reply_markup(reply_markup=None)
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
@@ -155,8 +159,11 @@ async def join(callback: CallbackQuery):
     await callback.answer()
 
 
+# ================= PACKAGE (TOMBOL HILANG) =================
 @dp.callback_query(F.data.startswith("pkg_"))
 async def select_package(callback: CallbackQuery):
+
+    await callback.message.edit_reply_markup(reply_markup=None)
 
     package = callback.data.replace("pkg_", "")
 
@@ -178,20 +185,15 @@ async def select_package(callback: CallbackQuery):
         "⏳ Tim kami akan segera melakukan verifikasi pembayaran Anda."
     )
 
-    await callback.message.answer(
-        text,
-        parse_mode="HTML"
-    )
-
+    await callback.message.answer(text, parse_mode="HTML")
     await callback.answer()
 
 
+# ================= PROOF =================
 @dp.message(F.photo)
 async def receive_proof(message: Message):
 
-    file_id = message.photo[-1].file_id
-
-    user_proofs[message.from_user.id] = file_id
+    user_proofs[message.from_user.id] = message.photo[-1].file_id
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
@@ -214,62 +216,45 @@ async def receive_proof(message: Message):
     )
 
 
+# ================= CONFIRM (TOMBOL HILANG) =================
 @dp.callback_query(F.data == "confirm_transfer")
 async def confirm_transfer(callback: CallbackQuery):
+
+    await callback.message.edit_reply_markup(reply_markup=None)
 
     user = callback.from_user
 
     package_key = user_packages.get(user.id)
 
     if not package_key:
-        await callback.answer(
-            "Silakan pilih paket terlebih dahulu.",
-            show_alert=True
-        )
+        await callback.answer("Silakan pilih paket terlebih dahulu.", show_alert=True)
         return
-
-    package = PACKAGE_MAP[package_key]
 
     proof = user_proofs.get(user.id)
 
     if not proof:
-        await callback.answer(
-            "Bukti transfer belum ditemukan.",
-            show_alert=True
-        )
+        await callback.answer("Bukti transfer belum ditemukan.", show_alert=True)
         return
 
-    username = (
-        f"@{user.username}"
-        if user.username
-        else "Tidak ada username"
-    )
+    data = PACKAGE_MAP[package_key]
+
+    username = f"@{user.username}" if user.username else "Tidak ada username"
 
     admin_text = (
         "🔔 <b>PERMINTAAN VERIFIKASI PEMBAYARAN</b>\n\n"
-
         f"👤 <b>Username:</b> {username}\n"
         f"🆔 <b>User ID:</b> <code>{user.id}</code>\n\n"
-
-        f"📦 <b>Paket:</b> {package['label']}\n"
-        f"💰 <b>Nominal:</b> Rp {package['price']:,}\n\n"
-
+        f"📦 <b>Paket:</b> {data['label']}\n"
+        f"💰 <b>Nominal:</b> Rp {data['price']:,}\n\n"
         "📸 Bukti transfer terlampir di atas.\n\n"
-
         "Silakan lakukan verifikasi pembayaran dan pilih tindakan di bawah."
     )
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(
-                    text="✅ TERIMA",
-                    callback_data=f"approve_{user.id}"
-                ),
-                InlineKeyboardButton(
-                    text="❌ TOLAK",
-                    callback_data=f"reject_{user.id}"
-                )
+                InlineKeyboardButton(text="✅ TERIMA", callback_data=f"approve_{user.id}"),
+                InlineKeyboardButton(text="❌ TOLAK", callback_data=f"reject_{user.id}")
             ]
         ]
     )
@@ -291,21 +276,22 @@ async def confirm_transfer(callback: CallbackQuery):
     await callback.answer()
 
 
+# ================= APPROVE (TOMBOL HILANG) =================
 @dp.callback_query(F.data.startswith("approve_"))
 async def approve(callback: CallbackQuery):
 
+    await callback.message.edit_reply_markup(reply_markup=None)
+
     user_id = int(callback.data.split("_")[1])
 
-    try:
+    invite = await bot.create_chat_invite_link(
+        chat_id=GROUP_ID,
+        member_limit=1
+    )
 
-        invite = await bot.create_chat_invite_link(
-            chat_id=GROUP_ID,
-            member_limit=1
-        )
-
-        await bot.send_message(
-            user_id,
-            f"""
+    await bot.send_message(
+        user_id,
+        f"""
 🎉 <b>Pembayaran Berhasil Diverifikasi</b>
 
 Selamat! Akun Anda telah berhasil diaktifkan sebagai member premium.
@@ -318,32 +304,24 @@ Selamat! Akun Anda telah berhasil diaktifkan sebagai member premium.
 
 Terima kasih telah bergabung bersama Signal AI Premium 🚀
 """,
-            parse_mode="HTML"
-        )
+        parse_mode="HTML"
+    )
 
-        await callback.message.answer(
-            "✅ User berhasil diapprove."
-        )
-
-    except Exception as e:
-
-        await callback.message.answer(
-            f"❌ Error approve:\n{e}"
-        )
-
+    await callback.message.answer("✅ User berhasil diapprove.")
     await callback.answer()
 
 
+# ================= REJECT (TOMBOL HILANG) =================
 @dp.callback_query(F.data.startswith("reject_"))
 async def reject(callback: CallbackQuery):
 
+    await callback.message.edit_reply_markup(reply_markup=None)
+
     user_id = int(callback.data.split("_")[1])
 
-    try:
-
-        await bot.send_message(
-            user_id,
-            """
+    await bot.send_message(
+        user_id,
+        """
 ❌ <b>Pembayaran Belum Dapat Diverifikasi</b>
 
 Mohon maaf, pembayaran Anda belum dapat kami konfirmasi.
@@ -352,23 +330,16 @@ Silakan periksa kembali bukti transfer yang dikirim atau hubungi admin untuk ban
 
 🙏 Terima kasih atas pengertiannya.
 """,
-            parse_mode="HTML"
-        )
+        parse_mode="HTML"
+    )
 
-        await callback.message.answer(
-            "❌ User berhasil ditolak."
-        )
-
-    except Exception as e:
-
-        await callback.message.answer(
-            f"❌ Error reject:\n{e}"
-        )
-
+    await callback.message.answer("❌ User berhasil ditolak.")
     await callback.answer()
 
 
+# ================= MAIN =================
 async def main():
+    await bot.delete_webhook(drop_pending_updates=True)
     print("Bot running...")
     await dp.start_polling(bot)
 
