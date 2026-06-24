@@ -22,6 +22,9 @@ user_proofs = {}
 # ================= TAMBAHAN: REFERRAL =================
 user_referral = {}
 
+# ================= TAMBAHAN: BROADCAST GROUP =================
+BROADCAST_GROUP_ID = -1004415837135
+
 
 def signal_example():
     return """
@@ -77,24 +80,17 @@ async def start(message: Message):
 
     text = (
         "<b>🎯 SELAMAT DATANG DI SIGNAL AI SYSTEM</b>\n\n"
-
         "Halo 👋\n\n"
-
         "Terima kasih telah mengunjungi layanan "
         "<b>Signal AI Premium</b>.\n\n"
-
         "<b>📊 CONTOH SIGNAL PREMIUM</b>\n\n"
-
-        f"{signal_example()}\n"
-
+        f"{signal_example()}\n\n"
         "<b>✨ Keuntungan Member Premium</b>\n\n"
-
         "✅ Signal harian berkualitas\n"
         "✅ Analisa market berbasis AI\n"
         "✅ Update market secara berkala\n"
         "✅ Akses grup member eksklusif\n"
         "✅ Support dan edukasi trading\n\n"
-
         "💡 Jika Anda sudah memahami layanan ini dan siap "
         "bergabung bersama member premium kami, "
         "silakan klik tombol di bawah."
@@ -180,9 +176,7 @@ async def select_package(callback: CallbackQuery):
     text = (
         f"💎 <b>Paket:</b> {data['label']}\n"
         f"💰 <b>Biaya:</b> Rp {data['price']:,}\n\n"
-
         f"{BANK_INFO}\n\n"
-
         "━━━━━━━━━━━━\n\n"
         "📸 Kirim bukti transfer setelah pembayaran.\n"
     )
@@ -239,7 +233,6 @@ async def confirm_transfer(callback: CallbackQuery):
 
     username = f"@{user.username}" if user.username else "Tidak ada username"
 
-    # ================= REF =================
     ref = user_referral.get(user.id, "Tidak ada")
 
     admin_text = (
@@ -298,17 +291,17 @@ async def approve(callback: CallbackQuery):
         f"📦 Paket: {package}\n"
         f"⏳ Durasi: {package.replace('_',' ').title()}\n"
         f"🔗 Referral: {ref}\n\n"
-        f"📎 Link: {invite.invite_link}"
+        f"🔗 Invite Link (1x pakai):\n{invite.invite_link}"
     )
 
-    # kirim ke user
+    # ================= USER =================
     await bot.send_message(user_id, text_success, parse_mode="HTML")
 
-    # kirim ke admin
+    # ================= ADMIN =================
     await bot.send_message(ADMIN_ID, text_success, parse_mode="HTML")
 
-    # kirim ke group
-    await bot.send_message(GROUP_ID, text_success, parse_mode="HTML")
+    # ================= GROUP BROADCAST =================
+    await bot.send_message(BROADCAST_GROUP_ID, text_success, parse_mode="HTML")
 
     await callback.message.answer("User approved & broadcast done.")
     await callback.answer()
