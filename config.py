@@ -1,14 +1,15 @@
-BOT_TOKEN = "8813573079:AAEDlmf7rNgNDqjyKGAFpHT0AscCiSbdnRs"
-ADMIN_ID = 1305881282
-GROUP_ID = -1002510797113
+import os
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
+GROUP_ID = int(os.getenv("GROUP_ID"))
 
 BANK_INFO = """
-🏦 Bank SMBC  
-👤 a/n Yuriandi Arma  
+🏦 Bank SMBC
+👤 a/n Yuriandi Arma
 💳 90240573080
 
-🏦 Bank CIMB NIAGA  
-👤 a/n Yuriandi Arma  
+🏦 Bank CIMB NIAGA
+👤 a/n Yuriandi Arma
 💳 708420455200
-
 """
