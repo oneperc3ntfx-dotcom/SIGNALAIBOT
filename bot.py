@@ -161,6 +161,7 @@ async def join(callback: CallbackQuery):
 
 
 # ================= PACKAGE =================
+# ================= PACKAGE =================
 @dp.callback_query(F.data.startswith("pkg_"))
 async def select_package(callback: CallbackQuery):
 
@@ -172,17 +173,23 @@ async def select_package(callback: CallbackQuery):
 
     data = PACKAGE_MAP[package]
 
-    text = (
+    qris = FSInputFile("assets/qris.jpg")
+
+    caption = (
         f"💎 <b>Paket:</b> {data['label']}\n"
-        f"💰 <b>Biaya:</b> Rp {data['price']:,}\n\n"
-        f"{BANK_INFO}\n\n"
-        "━━━━━━━━━━━━\n\n"
-        "📸 Kirim bukti transfer setelah pembayaran ke sini.\n"
+        f"💰 <b>Harga:</b> Rp {data['price']:,}\n\n"
+        "📱 Silakan lakukan pembayaran dengan melakukan scan pada kode QR di atas.\n\n"
+        "⚠️ Pastikan nominal pembayaran sesuai dengan harga paket yang dipilih.\n\n"
+        "📸 Setelah pembayaran berhasil, kirim bukti pembayaran (screenshot atau foto) ke chat ini."
     )
 
-    await callback.message.answer(text, parse_mode="HTML")
-    await callback.answer()
+    await callback.message.answer_photo(
+        photo=qris,
+        caption=caption,
+        parse_mode="HTML"
+    )
 
+    await callback.answer()
 
 # ================= PROOF =================
 @dp.message(F.photo)
