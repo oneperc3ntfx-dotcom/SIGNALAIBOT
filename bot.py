@@ -125,25 +125,25 @@ async def join(callback: CallbackQuery):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="💎 1 BULAN • Rp199K",
+                    text="💎 1 BULAN • Rp499K",
                     callback_data="pkg_1bulan"
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="💎 6 BULAN • Rp549K",
+                    text="💎 6 BULAN • Rp999K",
                     callback_data="pkg_6bulan"
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="💎 12 BULAN • Rp999K",
+                    text="💎 12 BULAN • Rp1.999K",
                     callback_data="pkg_12bulan"
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="👑 PERMANENT • Rp1.999K",
+                    text="👑 PERMANENT • Rp4.999K",
                     callback_data="pkg_permanent"
                 )
             ]
