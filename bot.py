@@ -123,30 +123,12 @@ async def join(callback: CallbackQuery):
 
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="💎 1 BULAN • Rp499K",
-                    callback_data="pkg_1bulan"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="💎 6 BULAN • Rp999K",
-                    callback_data="pkg_6bulan"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="💎 12 BULAN • Rp1.999K",
-                    callback_data="pkg_12bulan"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="👑 PERMANENT • Rp4.999K",
-                    callback_data="pkg_permanent"
-                )
-            ]
+          [
+InlineKeyboardButton(
+    text="👑 JOIN PREMIUM LIFETIME • Rp150K",
+    callback_data="pkg_permanent"
+)
+]
         ]
     )
 
