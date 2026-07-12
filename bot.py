@@ -122,16 +122,33 @@ async def join(callback: CallbackQuery):
     await callback.message.edit_reply_markup(reply_markup=None)
 
     kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-          [
-InlineKeyboardButton(
-    text="👑 JOIN PREMIUM LIFETIME • Rp150K",
-    callback_data="pkg_permanent"
-)
-]
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="📅 1 Bulan • Rp250.000",
+                callback_data="pkg_1month"
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="📅 6 Bulan • Rp500.000",
+                callback_data="pkg_6month"
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="📅 12 Bulan • Rp750.000",
+                callback_data="pkg_12month"
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="👑 Permanent • Rp1.500.000",
+                callback_data="pkg_permanent"
+            )
         ]
-    )
-
+    ]
+)
     await callback.message.answer(
         "<b>💰 PILIH PAKET LANGGANAN SIGNAL AI PREMIUM</b>\n\n"
         "Silakan pilih paket yang sesuai dengan kebutuhan Anda.",
