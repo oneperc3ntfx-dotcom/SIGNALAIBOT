@@ -296,15 +296,29 @@ async def approve(callback: CallbackQuery):
     price = data.get("price", 0)
 
     text_success = (
-        "🎉 <b>SUCCESS JOIN TO GROUP</b>\n\n"
-        f"👤 Username: {username}\n"
-        f"🆔 User ID: {user_id}\n"
-        f"📦 Paket: {label}\n"
-        f"💰 Harga: Rp {price:,}\n"
-        f"⏳ Durasi: {label}\n"
-        f"🔗 Referral: {ref}\n\n"
-        f"🔗 Invite Link (1x pakai):\n{invite.invite_link}"
-    )
+    "🎉 <b>SUCCESS JOIN TO GROUP</b>\n\n"
+    f"👤 Username: {username}\n"
+    f"🆔 User ID: {user_id}\n"
+    f"📦 Paket: {label}\n"
+    f"💰 Harga: Rp {price:,}\n"
+    f"⏳ Durasi: {label}\n"
+    f"🔗 Referral: {ref}\n\n"
+    "━━━━━━━━━━━━━━━━━━━━\n\n"
+    "🔗 <b>Link Grup (1x Pakai)</b>\n"
+    f"{invite.invite_link}\n\n\n"
+    "━━━━━━━━━━━━━━━━━━━━\n\n"
+    "🏆 <b>Broker yang Kami Sarankan</b>\n\n"
+    "Kami menyarankan menggunakan broker <b>FXGT-IDN</b>, "
+    "karena perhitungan harga, ratio, dan spread memiliki "
+    "kesamaan dengan broker yang kami gunakan untuk melakukan "
+    "analisa serta backtest signal.\n\n"
+    "Apabila Anda menggunakan broker lain, terdapat kemungkinan "
+    "harga entry, Take Profit (TP), maupun Stop Loss (SL) sedikit "
+    "berbeda dari hasil backtest kami.\n\n"
+    "🌐 <b>Daftar Broker:</b>\n"
+    "https://fxgt-idn.com"
+        atau Kunjungi Website Resmi nya di google  -> FXGT-IDN.com
+)
 
     # ================= USER =================
     await bot.send_message(user_id, text_success, parse_mode="HTML")
