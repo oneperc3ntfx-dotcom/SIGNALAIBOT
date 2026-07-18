@@ -1,4 +1,16 @@
 PACKAGE_MAP = {
+    "1day": {
+        "label": "1 Hari",
+        "price": 50000,
+        "days": 1
+    },
+
+    "7day": {
+        "label": "7 Hari",
+        "price": 150000,
+        "days": 7
+    },
+
     "1month": {
         "label": "1 Bulan",
         "price": 250000,
