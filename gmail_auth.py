@@ -1,3 +1,7 @@
+import os
+import json
+
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 
@@ -6,19 +10,27 @@ SCOPES = [
 ]
 
 
-flow = InstalledAppFlow.from_client_secrets_file(
-    "credentials.json",
-    SCOPES
-)
+def create_credentials():
+
+    creds_json = os.getenv(
+        "GMAIL_CREDENTIALS"
+    )
 
 
-creds = flow.run_local_server(
-    port=0
-)
+    creds_data = json.loads(
+        creds_json
+    )
 
 
-with open("token.json", "w") as token:
-    token.write(creds.to_json())
+    flow = InstalledAppFlow.from_client_config(
+        creds_data,
+        SCOPES
+    )
 
 
-print("✅ Gmail berhasil terhubung")
+    creds = flow.run_local_server(
+        port=0
+    )
+
+
+    return creds
