@@ -26,7 +26,7 @@ user_referral = {}
 BROADCAST_GROUP_ID = -1004311537613
 
 # ================= GROUP VERIFIKASI =================
-PAYMENT_GROUP_ID = -1001234567890
+PAYMENT_GROUP_ID = -1003934607716
 
 def signal_example():
     return """
