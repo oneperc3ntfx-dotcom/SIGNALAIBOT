@@ -341,9 +341,6 @@ async def approve(callback: CallbackQuery):
     # ================= USER =================
     await bot.send_message(user_id, text_success, parse_mode="HTML")
 
-    # ================= ADMIN =================
-    await bot.send_message(ADMIN_ID, text_success, parse_mode="HTML")
-
     # ================= GROUP BROADCAST =================
     await bot.send_message(BROADCAST_GROUP_ID, text_success, parse_mode="HTML")
 
