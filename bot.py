@@ -25,6 +25,8 @@ user_referral = {}
 # ================= TAMBAHAN: BROADCAST GROUP =================
 BROADCAST_GROUP_ID = -1004311537613
 
+# ================= GROUP VERIFIKASI =================
+PAYMENT_GROUP_ID = -1001234567890
 
 def signal_example():
     return """
@@ -271,7 +273,7 @@ async def confirm_transfer(callback: CallbackQuery):
     )
 
     await bot.send_photo(
-        ADMIN_ID,
+        PAYMENT_GROUP_ID,
         photo=proof,
         caption=admin_text,
         reply_markup=kb,
@@ -296,7 +298,7 @@ async def approve(callback: CallbackQuery):
     )
 
     user = await bot.get_chat(user_id)
-
+    admin_name = callback.from_user.full_name
     username = f"@{user.username}" if user.username else "Tidak ada username"
 
     ref = user_referral.get(user_id, "Tidak ada")
@@ -345,7 +347,10 @@ async def approve(callback: CallbackQuery):
     # ================= GROUP BROADCAST =================
     await bot.send_message(BROADCAST_GROUP_ID, text_success, parse_mode="HTML")
 
-    await callback.message.answer("User approved & broadcast done.")
+    await callback.message.answer(
+        f"✅ Disetujui oleh : {admin_name}"
+)
+
     await callback.answer()
 
 
@@ -363,7 +368,12 @@ async def reject(callback: CallbackQuery):
         parse_mode="HTML"
     )
 
-    await callback.message.answer("User ditolak.")
+    admin_name = callback.from_user.full_name
+
+    await callback.message.answer(
+        f"❌ Ditolak oleh : {admin_name}"
+)
+    
     await callback.answer()
 
 
